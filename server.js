@@ -13,7 +13,7 @@ server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
 
 server.get('/', function (req, res, next) {
-    res.send("hello world");
+    res.send("yo");
     next();
 });
 

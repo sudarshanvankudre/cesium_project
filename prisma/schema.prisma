@@ -1,0 +1,26 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ConstructionSite {
+  id String @id @default(uuid())
+  materials Material[]
+}
+
+model Material {
+  id String @id @default(uuid())
+  name String?
+  volume Float
+  cost_per_cubic_meter Float
+  color String
+  delivery_date DateTime?
+  construction_site ConstructionSite @relation(fields: [id], references: [id])
+}

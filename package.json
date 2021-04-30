@@ -12,6 +12,7 @@
     "test": "jasmine"
   },
   "dependencies": {
+    "@prisma/client": "^2.21.2",
     "knex": "^0.95.4",
     "pg": "^8.5.1",
     "restify": "^8.5.1",
