@@ -1,15 +1,27 @@
 // const knex = require("knex");
 const restify = require("restify");
 const {PrismaClient} = require('@prisma/client');
+const restifySwaggerJsdoc = require('restify-swagger-jsdoc');
 
 const prisma = new PrismaClient();
 
 const server = restify.createServer();
+restifySwaggerJsdoc.createSwaggerPage({
+    title: 'API Documentation',
+    version: '1.0.0',
+    server: server,
+    path: '/docs/swagger'
+});
 server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
 server.use(restify.plugins.queryParser());
 server.use(restify.plugins.bodyParser());
 
+/**
+ * Helper function to get materials of a given siteId corresponding to a construction site
+ * @param siteId
+ * @returns {Array}
+ */
 async function getMaterials(siteId) {
     const constructionSite = await prisma.constructionSite.findUnique({
         where: {
@@ -22,6 +34,9 @@ async function getMaterials(siteId) {
     return constructionSite.materials;
 }
 
+/**
+ * List of materials for given construction site
+ */
 server.get('/construction_site/:siteId/materials', async function (req, res, next) {
     const {siteId} = req.params;
     const materials = await getMaterials(siteId);
@@ -29,6 +44,9 @@ server.get('/construction_site/:siteId/materials', async function (req, res, nex
     next();
 });
 
+/**
+ * Total cost of materials for given construction site
+ */
 server.get('/construction_site/:siteId/total_cost', async function (req, res, next) {
     const {siteId} = req.params;
     const materials = await getMaterials(siteId);
@@ -40,6 +58,9 @@ server.get('/construction_site/:siteId/total_cost', async function (req, res, ne
     next();
 });
 
+/**
+ * Total cost of all materials, irrespective of construction site
+ */
 server.get('/materials/total_cost', async function (req, res, next) {
     const materials = await prisma.material.findMany();
     let cost = 0;
@@ -50,6 +71,9 @@ server.get('/materials/total_cost', async function (req, res, next) {
     next();
 });
 
+/**
+ * Update/create materials corresponding to a given construction site
+ */
 server.post('/construction_site/:siteId/materials', async function (req, res, next) {
     const materialData = req.body;
     await prisma.material.upsert({
@@ -63,6 +87,9 @@ server.post('/construction_site/:siteId/materials', async function (req, res, ne
     next();
 });
 
+/**
+ * Delete material corresponding to given id
+ */
 server.del('/materials/:materialId', async function (req, res, next) {
     const {materialId} = req.params;
     const deletedMaterial = await prisma.material.delete({
