@@ -1,5 +1,9 @@
 # Cesium Project
 
+## Reflection
+
+I spent roughly 3-4 hours on this project. I decided to use the Prisma framework for this project. It's a relatively new framework and looked interesting so I decided to use it. In hindsight, using something more established such as Sequelize might have been better. There were some bugs with importing and exporting that seemed to be a common occurrence with other users of the framework as well. Since I had already spent considerable time, I decided to keep going. The tradeoff is that I couldn't separate the functions that handled requests from the `server.js` file, something I had originally intended to do. Although Prisma made the job of working with the database easier, the immaturity of the framework ultimately reduced the time I had to add tests. 
+
 ## Setup
 
 ### PostgreSQL
