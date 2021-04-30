@@ -11,9 +11,9 @@
   },
   "dependencies": {
     "@prisma/client": "^2.21.2",
-    "knex": "^0.95.4",
     "pg": "^8.5.1",
     "restify": "^8.5.1",
+    "restify-swagger-jsdoc": "^3.2.4",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
