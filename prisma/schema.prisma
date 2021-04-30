@@ -22,5 +22,6 @@ model Material {
   cost_per_cubic_meter Float
   color String
   delivery_date DateTime?
-  construction_site ConstructionSite @relation(fields: [id], references: [id])
+  construction_site ConstructionSite? @relation(fields: [siteId], references: [id])
+  siteId String
 }
