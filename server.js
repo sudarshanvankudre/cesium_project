@@ -1,19 +1,76 @@
-const knex = require("knex");
+// const knex = require("knex");
 const restify = require("restify");
+const {PrismaClient} = require('@prisma/client');
 
-const connectionString = require("./connectionString");
-
-const client = knex({
-    client: "pg",
-    connection: connectionString,
-});
+const prisma = new PrismaClient();
 
 const server = restify.createServer();
 server.pre(restify.pre.sanitizePath());
 server.pre(restify.pre.userAgentConnection());
+server.use(restify.plugins.queryParser());
+server.use(restify.plugins.bodyParser());
 
-server.get('/', function (req, res, next) {
-    res.send("yo");
+async function getMaterials(siteId) {
+    const constructionSite = await prisma.constructionSite.findUnique({
+        where: {
+            id: siteId
+        },
+        include: {
+            materials: true,
+        },
+    });
+    return constructionSite.materials;
+}
+
+server.get('/construction_site/:siteId/materials', async function (req, res, next) {
+    const {siteId} = req.params;
+    const materials = await getMaterials(siteId);
+    res.send(materials);
+    next();
+});
+
+server.get('/construction_site/:siteId/total_cost', async function (req, res, next) {
+    const {siteId} = req.params;
+    const materials = await getMaterials(siteId);
+    let cost = 0;
+    for (let material of materials) {
+        cost += material.volume * material.cost_per_cubic_meter
+    }
+    res.send({"total_cost": cost});
+    next();
+});
+
+server.get('/materials/total_cost', async function (req, res, next) {
+    const materials = await prisma.material.findMany();
+    let cost = 0;
+    for (let material of materials) {
+        cost += material.volume * material.cost_per_cubic_meter
+    }
+    res.send({"total_cost": cost});
+    next();
+});
+
+server.post('/construction_site/:siteId/materials', async function (req, res, next) {
+    const materialData = req.body;
+    await prisma.material.upsert({
+        where: {
+            id: materialData.id
+        },
+        update: materialData,
+        create: materialData,
+    })
+    res.send("Successful");
+    next();
+});
+
+server.del('/materials/:materialId', async function (req, res, next) {
+    const {materialId} = req.params;
+    const deletedMaterial = await prisma.material.delete({
+        where: {
+            id: materialId,
+        }
+    });
+    res.send(deletedMaterial);
     next();
 });
 
@@ -34,8 +91,6 @@ function shutdown() {
 
     console.log("Closing server connections...");
     server.close(() => {
-        console.log("Closing database connections...");
-        client.destroy();
         clearTimeout(shutdownTimeout);
         console.log("Shutdown successful.");
     });
